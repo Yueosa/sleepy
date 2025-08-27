@@ -16,6 +16,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from objtyping import to_primitive
 import pytz
 import schedule
+import requests
 
 import utils as u
 from models import ConfigModel, _StatusItemModel
@@ -135,7 +136,30 @@ class Data:
             self._schedule_loop_th = Thread(target=self._schedule_loop, daemon=True)
             self._schedule_loop_th.start()
 
+            self._device_monitor_th = Thread(target=self._monitor_device_using, daemon=True)
+            self._device_monitor_th.start()
+
         l.debug(f'[data] init took {perf()}ms')
+
+    def _monitor_device_using(self):
+        """
+        实时监控所有设备的 using 状态：
+        - 全部 False -> status=1
+        - 有 True -> status=0
+        每 10 秒检测一次
+        """
+        while True:
+            try:
+                devices = self.device_list  # 获取所有设备
+                all_false = all(not v.get('using', False) for v in devices.values())
+                if all_false:
+                    url = "https://alive.yeastar.xin/api/status/set?secret=Yosa-0516&status=1"
+                else:
+                    url = "https://alive.yeastar.xin/api/status/set?secret=Yosa-0516&status=0"
+                requests.get(url, timeout=5)
+            except Exception as e:
+                l.error(f"[_monitor_device_using] {e}")
+            sleep(10)
 
     def _throw(self, e: SQLAlchemyError):
         '''
