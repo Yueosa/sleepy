@@ -16,6 +16,7 @@ data.json
 *.local.*
 .venv/
 .venv_legacy/
+Sleepy/
 
 # Others
 .vscode/launch.json
