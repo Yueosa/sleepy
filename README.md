@@ -16,7 +16,7 @@
 
 ### 部署地址
 
-**[Lian Alive?](https://qlive.yeastar.xin)**
+**[Lian Alive?](https://alive.yeastar.xin)**
 
 ## 部署 / 更新
 
