@@ -17,9 +17,12 @@ from objtyping import to_primitive
 import pytz
 import schedule
 import requests
+import yaml
+import os
 
 import utils as u
 from models import ConfigModel, _StatusItemModel
+
 
 l = getLogger(__name__)
 
@@ -148,14 +151,23 @@ class Data:
         - 有 True -> status=0
         每 10 秒检测一次
         """
+        config_path = os.path.join(os.path.dirname(__file__), "data", "config.yaml")
+
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+
+        secret = config.get("main", {}).get("secret", "")
+        if not isinstance(secret, str):
+            raise ValueError("❌ main.secret 必须是字符串")
+
         while True:
             try:
                 devices = self.device_list  # 获取所有设备
                 all_false = all(not v.get('using', False) for v in devices.values())
                 if all_false:
-                    url = "https://alive.yeastar.xin/api/status/set?secret=Yosa-0516&status=1"
+                    url = f"https://alive.yeastar.xin/api/status/set?secret={secret}&status=1"
                 else:
-                    url = "https://alive.yeastar.xin/api/status/set?secret=Yosa-0516&status=0"
+                    url = "https://alive.yeastar.xin/api/status/set?secret={secret}&status=0"
                 requests.get(url, timeout=5)
             except Exception as e:
                 l.error(f"[_monitor_device_using] {e}")
