@@ -165,9 +165,9 @@ class Data:
                 devices = self.device_list  # 获取所有设备
                 all_false = all(not v.get('using', False) for v in devices.values())
                 if all_false:
-                    url = f"https://alive.yeastar.xin/api/status/set?secret={secret}&status=1"
+                    url = "https://alive.yeastar.xin/api/status/set?secret=" + secret + "&status=1"
                 else:
-                    url = "https://alive.yeastar.xin/api/status/set?secret={secret}&status=0"
+                    url = f"https://alive.yeastar.xin/api/status/set?secret={secret}&status=0"
                 requests.get(url, timeout=5)
             except Exception as e:
                 l.error(f"[_monitor_device_using] {e}")
